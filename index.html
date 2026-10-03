@@ -1,15 +1,388 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <title>Meine erste GitHub Website</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoolApp — Interaktiver Rechner & Doku Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Tailwind Configuration for Dark Mode & Theme Colors
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f0f4f8; }
-        h1 { color: #2b6cb0; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Pulse glow animation */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .glow-bg {
+            animation: pulseGlow 6s infinite ease-in-out;
+        }
     </style>
 </head>
-<body>
-    <h1>Hallo Welt! 👋</h1>
-    <p>Meine erste eigene Website auf GitHub Pages läuft!</p>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <header class="sticky top-0 z-50 glass border-b border-slate-200/50 dark:border-slate-800/50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+                    <i class="fa-solid fa-cube text-xl"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-brand-600 to-indigo-600 dark:from-brand-500 dark:to-indigo-400 bg-clip-text text-transparent">
+                    CoolApp v1.0
+                </span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <a href="#features" class="hover:text-brand-600 dark:hover:text-brand-500 transition-colors">Features</a>
+                <a href="#calculator" class="hover:text-brand-600 dark:hover:text-brand-500 transition-colors">Preisrechner</a>
+                <a href="#api" class="hover:text-brand-600 dark:hover:text-brand-500 transition-colors">API Doku</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <!-- Dark Mode Toggle Button -->
+                <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <a href="https://github.com" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-white transition-all shadow-sm">
+                    <i class="fa-brands fa-github"></i>
+                    GitHub Repo
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <section class="relative overflow-hidden py-20 lg:py-28">
+            <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-500/20 dark:bg-brand-500/10 rounded-full blur-3xl pointer-events-none glow-bg"></div>
+            
+            <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-500 border border-brand-200 dark:border-brand-500/20 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    GitHub Pages Demo Ready
+                </span>
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight sm:leading-tight mb-6">
+                    Deine Software-Website & API-Doku auf <span class="bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent">GitHub Pages</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Vollkommen kostenlos gehostet, extrem schnell und vollständig dynamisch mit HTML, Tailwind CSS und interaktiver Berechnung!
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#calculator" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calculator"></i>
+                        Rechner Ausprobieren
+                    </a>
+                    <a href="#api" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-code"></i>
+                        API Dokumentation
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="calculator" class="py-16 bg-slate-100/50 dark:bg-slate-900/50 border-y border-slate-200/80 dark:border-slate-800/80">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-3">
+                        Interaktiver Software-Rechner
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-400">
+                        Berechne geschätzte Lizenzkosten oder Infrastruktur-Bedarf für deine Nutzer in Echtzeit.
+                    </p>
+                </div>
+
+                <div class="glass rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/50 dark:border-slate-800/50 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <!-- Controls Column -->
+                    <div class="space-y-6">
+                        <!-- Slider 1: User Count -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="userSlider" class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    <i class="fa-solid fa-users text-brand-500 mr-2"></i>Anzahl der Benutzer
+                                </label>
+                                <span id="userCount" class="px-2.5 py-1 rounded-md bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-500 font-bold text-sm">
+                                    25 Nutzer
+                                </span>
+                            </div>
+                            <input type="range" id="userSlider" min="1" max="200" value="25" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                        </div>
+
+                        <!-- Dropdown: Tier Selection -->
+                        <div>
+                            <label for="tierSelect" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                <i class="fa-solid fa-layer-group text-brand-500 mr-2"></i>Software Edition
+                            </label>
+                            <select id="tierSelect" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                                <option value="5">Community (5€ / Nutzer / Monat)</option>
+                                <option value="12" selected>Pro Edition (12€ / Nutzer / Monat)</option>
+                                <option value="25">Enterprise (25€ / Nutzer / Monat)</option>
+                            </select>
+                        </div>
+
+                        <!-- Toggle Switch: Annual Billing Discount -->
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-tags text-emerald-500"></i>
+                                Jährliche Abrechnung <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">(-20% Rabatt)</span>
+                            </span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="annualToggle" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Output Column -->
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white dark:from-brand-950 dark:to-slate-900 border border-slate-800 shadow-inner flex flex-col justify-between h-full">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Geschätzte Gesamtkosten</span>
+                            <div class="mt-2 flex items-baseline gap-1">
+                                <span id="totalPrice" class="text-4xl sm:text-5xl font-black text-white tracking-tight">240,00 €</span>
+                                <span id="billingPeriod" class="text-slate-400 text-sm font-medium">/ Monat</span>
+                            </div>
+                            <p id="savingsNotice" class="mt-2 text-xs text-emerald-400 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> Du sparst 72,00 € pro Jahr durch jährliche Abrechnung!
+                            </p>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-700/60 space-y-2 text-xs text-slate-300">
+                            <div class="flex justify-between">
+                                <span>Kosten pro Nutzer:</span>
+                                <span id="perUserCost" class="font-bold">9,60 €</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Support Level:</span>
+                                <span id="supportTier" class="font-bold text-brand-400">Priority 24/7</span>
+                            </div>
+                        </div>
+
+                        <button onclick="copyEstimate()" class="mt-6 w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 font-semibold text-xs text-white transition-all flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i>
+                            <span id="copyBtnText">Angebot Kopieren</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="api" class="py-20">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-3">
+                        API Quickstart Beispiel
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-400">
+                        So einfach lässt sich die Bibliothek in dein JavaScript-Projekt einbinden:
+                    </p>
+                </div>
+
+                <!-- Code Window Component -->
+                <div class="rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl">
+                    <div class="px-4 py-3 bg-slate-950 flex items-center justify-between border-b border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                            <span class="ml-2 text-xs font-mono text-slate-400">app.js</span>
+                        </div>
+                        <button onclick="copyCode()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                            <i class="fa-regular fa-copy"></i>
+                            <span id="copyCodeText">Code kopieren</span>
+                        </button>
+                    </div>
+                    <div class="p-5 font-mono text-sm leading-relaxed overflow-x-auto text-slate-300">
+<pre id="codeBlock"><span class="text-purple-400">import</span> { CoolApp } <span class="text-purple-400">from</span> <span class="text-emerald-400">'@coolapp/core'</span>;
+
+<span class="text-slate-500">// Initialize CoolApp Instance</span>
+<span class="text-purple-400">const</span> app = <span class="text-purple-400">new</span> <span class="text-blue-400">CoolApp</span>({
+    apiKey: <span class="text-emerald-400">'your_api_key_here'</span>,
+    theme: <span class="text-emerald-400">'auto'</span>
+});
+
+<span class="text-slate-500">// Fetch Software Metrics</span>
+<span class="text-purple-400">async function</span> <span class="text-blue-400">loadMetrics</span>() {
+    <span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> app.metrics.<span class="text-blue-400">getStats</span>();
+    console.<span class="text-blue-400">log</span>(<span class="text-emerald-400">`Active Sessions: ${data.activeUsers}`</span>);
+}
+
+<span class="text-blue-400">loadMetrics</span>();</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-8">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+            <p>© 2026 CoolApp. Gehostet mit ❤️ auf <a href="https://pages.github.com" target="_blank" class="underline hover:text-brand-500">GitHub Pages</a>.</p>
+            <div class="flex items-center gap-4">
+                <a href="#calculator" class="hover:underline">Rechner</a>
+                <a href="#api" class="hover:underline">API Doku</a>
+                <a href="#" class="hover:underline">Datenschutz</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. Theme Toggle Logic ---
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Check user preferences or system theme
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+        });
+
+        // --- 2. Calculator Logic ---
+        const userSlider = document.getElementById('userSlider');
+        const userCount = document.getElementById('userCount');
+        const tierSelect = document.getElementById('tierSelect');
+        const annualToggle = document.getElementById('annualToggle');
+
+        const totalPriceEl = document.getElementById('totalPrice');
+        const perUserCostEl = document.getElementById('perUserCost');
+        const supportTierEl = document.getElementById('supportTier');
+        const savingsNotice = document.getElementById('savingsNotice');
+        const billingPeriod = document.getElementById('billingPeriod');
+
+        function calculateCost() {
+            const users = parseInt(userSlider.value);
+            const basePrice = parseFloat(tierSelect.value);
+            const isAnnual = annualToggle.checked;
+
+            userCount.textContent = `${users} Nutzer`;
+
+            // Calculate discounts
+            let pricePerUser = basePrice;
+            if (isAnnual) {
+                pricePerUser = basePrice * 0.8; // 20% discount
+            }
+
+            const totalMonthly = users * pricePerUser;
+            const fullPriceMonthly = users * basePrice;
+            const annualSavings = (fullPriceMonthly - totalMonthly) * 12;
+
+            // Update UI Output
+            totalPriceEl.textContent = totalMonthly.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+            perUserCostEl.textContent = pricePerUser.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+
+            if (isAnnual) {
+                billingPeriod.textContent = '/ Monat (jährlich abgerechnet)';
+                savingsNotice.classList.remove('hidden');
+                savingsNotice.innerHTML = `<i class="fa-solid fa-circle-check"></i> Du sparst ${annualSavings.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })} pro Jahr!`;
+            } else {
+                billingPeriod.textContent = '/ Monat';
+                savingsNotice.classList.add('hidden');
+            }
+
+            // Update Support Badge based on Tier
+            if (basePrice === 5) {
+                supportTierEl.textContent = 'Community Support';
+                supportTierEl.className = 'font-bold text-slate-400';
+            } else if (basePrice === 12) {
+                supportTierEl.textContent = 'Priority 24/7';
+                supportTierEl.className = 'font-bold text-brand-400';
+            } else {
+                supportTierEl.textContent = 'Dedicated Account Manager';
+                supportTierEl.className = 'font-bold text-emerald-400';
+            }
+        }
+
+        userSlider.addEventListener('input', calculateCost);
+        tierSelect.addEventListener('change', calculateCost);
+        annualToggle.addEventListener('change', calculateCost);
+
+        // Initial Calculation
+        calculateCost();
+
+        // --- 3. Copy Utilities ---
+        function copyEstimate() {
+            const users = userSlider.value;
+            const total = totalPriceEl.textContent;
+            const textToCopy = `CoolApp Angebot: ${users} Nutzer für ${total} / Monat.`;
+
+            document.execCommand('copy'); // Safe clipboard fallback
+            
+            const btnText = document.getElementById('copyBtnText');
+            btnText.textContent = 'Kopiert! ✓';
+            setTimeout(() => {
+                btnText.textContent = 'Angebot Kopieren';
+            }, 2000);
+        }
+
+        function copyCode() {
+            const codeText = document.getElementById('codeBlock').innerText;
+            
+            // Temporary textarea fallback for iframe environments
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyCodeText = document.getElementById('copyCodeText');
+            copyCodeText.textContent = 'Kopiert!';
+            setTimeout(() => {
+                copyCodeText.textContent = 'Code kopieren';
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
