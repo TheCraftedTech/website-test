@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenCue – Lichtsteuerung im Browser</title>
+<meta name="description" content="OpenCue ist eine Lichtsteuer-Software mit Pult-Logik: Executors, Cues und frei anordenbare Panels. Python-Backend, Bedienung von jedem Gerät im Netzwerk.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#000;
+  --panel:#101010;
+  --panel-2:#181818;
+  --line:#2a2a2a;
+  --line-hi:#3d3d3d;
+  --text:#ececec;
+  --muted:#8c8c8c;
+  --amber:#ffb000;
+  --amber-dim:#5c4000;
+  --red:#ff3b30;
+  --green:#34d96b;
+  --blue:#2f7bff;
+  --magenta:#e23cff;
+  --cyan:#22d3ee;
+  --ui:"Barlow","Segoe UI",system-ui,sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--text);font-family:var(--ui);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font-family:var(--cond);font-weight:700;font-size:26px;letter-spacing:.02em;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo i{width:14px;height:14px;background:var(--amber);border-radius:50%;box-shadow:0 0 14px var(--amber)}
+.navlinks{display:flex;gap:28px;align-items:center;font-size:15px}
+.navlinks a{text-decoration:none;color:var(--muted)}
+.navlinks a:hover{color:var(--text)}
+.btn{display:inline-block;font-family:var(--cond);font-weight:600;font-size:19px;letter-spacing:.03em;text-decoration:none;padding:11px 26px;border:1px solid var(--amber);background:var(--amber);color:#000;border-radius:3px}
+.btn:hover{background:#ffc033}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--line-hi)}
+.btn.ghost:hover{border-color:var(--text);background:transparent}
+nav .btn{padding:6px 18px;font-size:17px}
+
+/* hero */
+.hero{padding:84px 0 40px}
+h1{font-family:var(--cond);font-weight:700;font-size:clamp(52px,9vw,112px);line-height:.92;letter-spacing:-.005em;max-width:12ch}
+.hero p.lead{margin-top:28px;max-width:56ch;font-size:20px;color:#bdbdbd}
+.cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
+.hero small{display:block;margin-top:16px;color:var(--muted);font-size:14px}
+
+/* console */
+.console{margin:56px 0 0;border:1px solid var(--line-hi);border-radius:6px;background:var(--black);overflow:hidden}
+.titlebar{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:var(--panel-2);border-bottom:1px solid var(--line);font-family:var(--cond);font-size:16px;letter-spacing:.03em;color:var(--muted)}
+.titlebar b{color:var(--text);font-weight:600}
+.status{display:flex;gap:16px;align-items:center}
+.status span{display:flex;align-items:center;gap:6px}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.status i.off{background:var(--line-hi)}
+.grid{display:grid;grid-template-columns:1.7fr 1fr;gap:1px;background:var(--line)}
+.pane{background:var(--black);padding:14px}
+.pane h3{font-family:var(--cond);font-weight:600;font-size:15px;color:var(--muted);letter-spacing:.04em;margin-bottom:10px;display:flex;justify-content:space-between}
+.stage{position:relative;height:300px;border:1px solid var(--line);background:#000;overflow:hidden}
+.floor{position:absolute;inset:auto 0 0 0;height:55%;background:radial-gradient(ellipse at 50% 100%,rgba(255,255,255,.06),transparent 70%)}
+.fix{position:absolute;top:0;width:12.5%;height:100%}
+.fix .head{position:absolute;top:10px;left:50%;width:18px;height:12px;transform:translateX(-50%);background:#2b2b2b;border:1px solid #444;border-radius:2px}
+.fix .beam{position:absolute;top:22px;left:50%;width:100%;height:calc(100% - 22px);transform:translateX(-50%);
+  clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);
+  background:linear-gradient(to bottom,var(--c,#000) 0%,transparent 100%);opacity:var(--o,0);transition:opacity .15s}
+.fix .pool{position:absolute;bottom:-18px;left:50%;width:90%;height:36px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,var(--c,#000),transparent 70%);opacity:var(--o,0);transition:opacity .15s}
+.sheet{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tile{border:1px solid var(--line);background:var(--panel);padding:7px 8px;font-family:var(--cond);font-size:15px;line-height:1.2}
+.tile em{display:block;font-style:normal;color:var(--muted);font-size:13px}
+.tile .sw{display:block;height:5px;margin-top:6px;background:var(--c,#222);border-radius:1px}
+.right-col{display:flex;flex-direction:column;gap:18px}
+.cmd{border:1px solid var(--line);background:var(--panel);padding:8px 10px;font-family:var(--cond);font-size:17px;min-height:38px;color:var(--amber)}
+.cmd span{color:var(--muted)}
+.cmd .cur{display:inline-block;width:8px;height:15px;background:var(--amber);vertical-align:-2px;margin-left:2px;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* executors */
+.execs{display:grid;grid-template-columns:repeat(8,1fr) 1.15fr;gap:8px;padding:14px;border-top:1px solid var(--line);background:var(--black)}
+.ex{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.ex .key{height:62px;border:1px solid var(--line-hi);background:var(--panel-2);color:var(--text);font-family:var(--cond);font-size:16px;font-weight:600;cursor:pointer;border-radius:3px;position:relative;line-height:1.1;padding:4px}
+.ex .key::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--c);opacity:.35;border-radius:3px 3px 0 0}
+.ex .key[aria-pressed="true"]{background:var(--c);color:#000;border-color:var(--c)}
+.ex .key[aria-pressed="true"]::before{opacity:0}
+.ex .key:active{transform:translateY(1px)}
+.ex .n{font-family:var(--cond);font-size:13px;color:var(--muted);text-align:center}
+.master{display:flex;flex-direction:column;gap:6px;border-left:1px solid var(--line);padding-left:10px}
+.master label{font-family:var(--cond);font-size:13px;color:var(--muted);text-align:center}
+.master input{width:100%;accent-color:var(--amber);height:34px;cursor:pointer}
+.master .val{font-family:var(--cond);font-size:26px;text-align:center;color:var(--amber);line-height:1}
+
+/* sections */
+section{padding:96px 0;border-top:1px solid var(--line)}
+h2{font-family:var(--cond);font-weight:700;font-size:clamp(36px,5vw,60px);line-height:1;max-width:18ch}
+.sub{margin-top:16px;color:#aaa;max-width:58ch;font-size:19px}
+.feat{margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line)}
+.f{padding:30px 28px 34px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0}
+.f h3{font-family:var(--cond);font-weight:600;font-size:27px;line-height:1.1;margin-bottom:10px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.f p{color:#a9a9a9;font-size:16.5px}
+.chip{font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:.04em;padding:1px 9px;border:1px solid var(--line-hi);border-radius:20px;color:var(--muted)}
+.chip.dev{border-color:var(--amber-dim);color:var(--amber)}
+.chip.ok{border-color:#16532b;color:var(--green)}
+
+/* how */
+.how{margin-top:52px;display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+.flow{display:grid;gap:10px}
+.node{border:1px solid var(--line-hi);background:var(--panel);padding:16px 20px;border-radius:3px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.node b{font-family:var(--cond);font-size:23px;font-weight:600}
+.node span{color:var(--muted);font-size:15px;text-align:right}
+.node.core{border-color:var(--amber);background:#0a0700}
+.link{height:22px;margin:0 auto;width:1px;background:repeating-linear-gradient(to bottom,var(--line-hi) 0 4px,transparent 4px 8px)}
+.how ul{list-style:none;display:grid;gap:22px}
+.how li strong{display:block;font-family:var(--cond);font-size:23px;font-weight:600;margin-bottom:2px}
+.how li{color:#a9a9a9;padding-left:18px;border-left:2px solid var(--line-hi)}
+
+/* final */
+.final{text-align:center;padding:120px 0}
+.final h2{margin:0 auto;max-width:14ch}
+.final .sub{margin:18px auto 0}
+.final .cta{justify-content:center}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+@media (max-width:960px){
+  .grid{grid-template-columns:1fr}
+  .execs{grid-template-columns:repeat(4,1fr)}
+  .master{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding:10px 0 0}
+  .feat{grid-template-columns:1fr 1fr}
+  .how{grid-template-columns:1fr;gap:40px}
+}
+@media (max-width:620px){
+  body{font-size:16px}
+  .wrap{padding:0 16px}
+  .navlinks a:not(.btn){display:none}
+  .hero{padding-top:52px}
+  .feat{grid-template-columns:1fr}
+  .stage{height:230px}
+  .sheet{grid-template-columns:repeat(2,1fr)}
+  section{padding:68px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top"><i></i>OpenCue</a>
+    <div class="navlinks">
+      <a href="#funktionen">Funktionen</a>
+      <a href="#aufbau">Aufbau</a>
+      <a class="btn" href="#download">Download</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap" id="top">
+  <h1>Lichtpult in deinem Browser.</h1>
+  <p class="lead">OpenCue steuert deine Show mit der Logik eines echten Pults: Executors, Cues, Programmer, Fader. Das Backend läuft in Python, bedienen kannst du es von jedem Gerät im Netzwerk.</p>
+  <div class="cta">
+    <a class="btn" href="#download">OpenCue herunterladen</a>
+    <a class="btn ghost" href="#funktionen">Funktionen ansehen</a>
+  </div>
+  <small>Probier es unten aus: Die Executor-Tasten und der Master-Fader funktionieren.</small>
+
+  <div class="console" aria-label="Interaktive Vorschau der OpenCue-Oberfläche">
+    <div class="titlebar">
+      <span><b>OpenCue</b> &nbsp; Show: Herbstkonzert</span>
+      <span class="status"><span><i></i>Backend verbunden</span><span><i class="off"></i>DMX-Ausgang</span></span>
+    </div>
+    <div class="grid">
+      <div class="pane">
+        <h3><span>Bühne</span><span>8 Fixtures</span></h3>
+        <div class="stage" id="stage"><div class="floor"></div></div>
+      </div>
+      <div class="pane right-col">
+        <div>
+          <h3><span>Fixtures</span><span id="activeCount">0 aktiv</span></h3>
+          <div class="sheet" id="sheet"></div>
+        </div>
+        <div>
+          <h3><span>Kommandozeile</span></h3>
+          <div class="cmd" id="cmd"><span>&gt;</span> bereit<span class="cur"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="execs" id="execs"></div>
+  </div>
+</header>
+
+<section id="funktionen">
+  <div class="wrap">
+    <h2>Gebaut wie ein Pult, flexibel wie eine Web-App.</h2>
+    <p class="sub">Du programmierst Looks, speicherst sie auf Executors und spielst sie live ab. Die Oberfläche passt sich an deinen Arbeitsablauf an, nicht umgekehrt.</p>
+
+    <div class="feat">
+      <div class="f">
+        <h3>Frei anordenbare Panels <span class="chip dev">In Entwicklung</span></h3>
+        <p>Fixture-Liste, Bühnenansicht, Executors und Kommandozeile liegen als Panels auf deiner Arbeitsfläche. Du verschiebst sie, ziehst sie auf und speicherst dein Layout.</p>
+      </div>
+      <div class="f">
+        <h3>Executors und Cues <span class="chip dev">In Entwicklung</span></h3>
+        <p>Looks auf Tasten legen, per Go starten, mit Fadern überblenden. Die Bedienung folgt dem, was du von einem Lichtpult kennst.</p>
+      </div>
+      <div class="f">
+        <h3>Jedes Gerät ist ein Bedienfeld <span class="chip dev">In Entwicklung</span></h3>
+        <p>OpenCue läuft per WebSocket im Browser. Laptop, Tablet und Handy zeigen denselben Zustand und lassen sich parallel nutzen.</p>
+      </div>
+      <div class="f">
+        <h3>Versionierung mit Undo und Redo <span class="chip">Geplant</span></h3>
+        <p>Jede Änderung an der Show wird festgehalten, ähnlich wie bei Git. Du gehst Schritt für Schritt zurück oder springst zu einem früheren Stand.</p>
+      </div>
+      <div class="f">
+        <h3>Kamera-Panel <span class="chip">Geplant</span></h3>
+        <p>Zeige eine Netzwerkkamera oder die Kamera deines Geräts direkt neben den Fixtures. Auch mehrere Geräte lassen sich gleichzeitig einbinden.</p>
+      </div>
+      <div class="f">
+        <h3>Lokaler KI-Assistent <span class="chip">Geplant</span></h3>
+        <p>Beschreibe einen Look, und eine lokale KI programmiert ihn in der Show. Danach bedienst du alles manuell. Deine Daten bleiben auf deinem Rechner.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="aufbau">
+  <div class="wrap">
+    <h2>So hängt alles zusammen.</h2>
+    <p class="sub">Ein Python-Backend hält die Show und gibt die Werte aus. Jede Oberfläche im Browser spricht über WebSockets mit ihm.</p>
+
+    <div class="how">
+      <div class="flow" aria-label="Aufbau von OpenCue">
+        <div class="node"><b>Browser</b><span>Laptop, Tablet, Handy</span></div>
+        <div class="link"></div>
+        <div class="node core"><b>OpenCue-Backend</b><span>Python, Show-Daten, Cue-Logik</span></div>
+        <div class="link"></div>
+        <div class="node"><b>Ausgabe</b><span>Fixtures über DMX</span></div>
+      </div>
+      <ul>
+        <li><strong>Eine Show, mehrere Bediener</strong>Änderungen erscheinen sofort auf allen verbundenen Geräten.</li>
+        <li><strong>Keine Installation auf dem Bediengerät</strong>Eine Adresse im Browser öffnen, fertig.</li>
+        <li><strong>Offen und anpassbar</strong>Das Backend ist in Python geschrieben und lässt sich erweitern.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="download">
+  <div class="wrap">
+    <h2>Bereit für die erste Show?</h2>
+    <p class="sub">Lade OpenCue herunter, starte das Backend und öffne die Oberfläche im Browser.</p>
+    <div class="cta">
+      <a class="btn" href="#">Download für Windows</a>
+      <a class="btn ghost" href="#">Quellcode ansehen</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>OpenCue &copy; 2026</span>
+    <span>Ein unabhängiges Projekt. Nicht mit anderen Pult-Herstellern verbunden.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var COLORS = {amber:"#ffb000",red:"#ff3b30",green:"#34d96b",blue:"#2f7bff",magenta:"#e23cff",cyan:"#22d3ee",white:"#ffffff"};
+  var N = 8;
+  // each executor: name, color, mask (which fixtures), optional chase
+  var EX = [
+    {n:"Warm",      c:COLORS.amber,   m:[1,1,1,1,1,1,1,1]},
+    {n:"Blau",      c:COLORS.blue,    m:[1,1,1,1,0,0,0,0]},
+    {n:"Rot",       c:COLORS.red,     m:[0,0,0,0,1,1,1,1]},
+    {n:"Magenta",   c:COLORS.magenta, m:[0,1,0,1,0,1,0,1]},
+    {n:"Cyan",      c:COLORS.cyan,    m:[1,0,1,0,1,0,1,0]},
+    {n:"Grün",      c:COLORS.green,   m:[0,0,1,1,1,1,0,0]},
+    {n:"Chase",     c:COLORS.white,   m:null, chase:true},
+    {n:"Blinder",   c:COLORS.white,   m:[1,1,1,1,1,1,1,1], blind:true}
+  ];
+
+  var stage = document.getElementById("stage");
+  var sheet = document.getElementById("sheet");
+  var execsEl = document.getElementById("execs");
+  var cmd = document.getElementById("cmd");
+  var count = document.getElementById("activeCount");
+  var master = 80;
+  var active = []; // order of activation
+  var step = 0, timer = null;
+
+  var fixEls = [];
+  for (var i = 0; i < N; i++){
+    var f = document.createElement("div");
+    f.className = "fix";
+    f.style.left = (i * 12.5) + "%";
+    f.innerHTML = '<div class="beam"></div><div class="pool"></div><div class="head"></div>';
+    stage.appendChild(f);
+    fixEls.push(f);
+
+    var t = document.createElement("div");
+    t.className = "tile";
+    t.innerHTML = 'Fix ' + (i+1) + '<em>0 %</em><span class="sw"></span>';
+    sheet.appendChild(t);
+  }
+  var tiles = sheet.children;
+
+  var keys = [];
+  EX.forEach(function(e, idx){
+    var w = document.createElement("div");
+    w.className = "ex";
+    var b = document.createElement("button");
+    b.className = "key";
+    b.type = "button";
+    b.textContent = e.n;
+    b.style.setProperty("--c", e.c);
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", function(){ toggle(idx); });
+    var n = document.createElement("div");
+    n.className = "n";
+    n.textContent = "Exec " + (idx + 1);
+    w.appendChild(b); w.appendChild(n);
+    execsEl.appendChild(w);
+    keys.push(b);
+  });
+
+  var mw = document.createElement("div");
+  mw.className = "master";
+  mw.innerHTML = '<label for="mf">Master</label><input id="mf" type="range" min="0" max="100" value="80" aria-label="Master-Fader"><div class="val" id="mv">80</div>';
+  execsEl.appendChild(mw);
+  var mf = mw.querySelector("#mf"), mv = mw.querySelector("#mv");
+  mf.addEventListener("input", function(){
+    master = +mf.value; mv.textContent = master;
+    say("Master at " + master);
+    render();
+  });
+
+  function say(t){
+    cmd.innerHTML = '<span>&gt;</span> ' + t + '<span class="cur"></span>';
+  }
+
+  function toggle(i){
+    var at = active.indexOf(i);
+    if (at >= 0){ active.splice(at, 1); say("Exec " + (i+1) + " Off"); }
+    else { active.push(i); say("Go+ Exec " + (i+1) + " (" + EX[i].n + ")"); }
+    keys[i].setAttribute("aria-pressed", at >= 0 ? "false" : "true");
+    var chaseOn = active.indexOf(6) >= 0;
+    if (chaseOn && !timer && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      timer = setInterval(function(){ step = (step + 1) % N; render(); }, 220);
+    } else if (!chaseOn && timer){ clearInterval(timer); timer = null; }
+    render();
+  }
+
+  function render(){
+    var color = new Array(N), lvl = new Array(N), on = 0;
+    for (var k = 0; k < active.length; k++){
+      var e = EX[active[k]];
+      for (var j = 0; j < N; j++){
+        var hit = e.chase ? (j === step || j === (N - 1 - step)) : e.m[j];
+        if (hit){ color[j] = e.c; lvl[j] = 1; }
+      }
+    }
+    for (var j = 0; j < N; j++){
+      var l = lvl[j] ? lvl[j] * master / 100 : 0;
+      var f = fixEls[j];
+      f.style.setProperty("--c", color[j] || "#000");
+      f.style.setProperty("--o", l.toFixed(2));
+      var t = tiles[j];
+      t.querySelector("em").textContent = Math.round(l * 100) + " %";
+      t.querySelector(".sw").style.setProperty("--c", l ? color[j] : "#222");
+      if (l) on++;
+    }
+    count.textContent = on + " aktiv";
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
